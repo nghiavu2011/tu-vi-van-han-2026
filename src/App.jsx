@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { lapLaSo } from './lib/tuvi';
 import { getMonthlyFortune, calcFortuneScore, getDaiVan } from './lib/vanhan2026';
 import { generateInterpretation } from './services/aiService';
+import { saveProfile, getPinnedProfile } from './services/profileManager';
+import { exportToPDF, downloadAsText } from './services/pdfExport';
 import FormLaSo from './components/FormLaSo';
 import LaSo from './components/LaSo';
+import ProfileManager from './components/ProfileManager';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles,
@@ -11,16 +14,19 @@ import {
     LineChart as ChartIcon,
     Layout,
     ChevronRight,
-    History,
+    Users,
     Settings,
     ArrowLeft,
-    Search,
+    Download,
+    FileText,
+    Share2,
     CheckCircle2,
-    AlertTriangle
+    AlertTriangle,
+    RefreshCw
 } from 'lucide-react';
 
 const App = () => {
-    const [screen, setScreen] = useState('welcome'); // welcome, form, result
+    const [screen, setScreen] = useState('welcome'); // welcome, form, result, profiles
     const [tab, setTab] = useState('overview'); // overview, monthly, 10year, chart
     const [laSoData, setLaSoData] = useState(null);
     const [fortuneScore, setFortuneScore] = useState(65);
@@ -29,6 +35,19 @@ const App = () => {
     const [interpretation, setInterpretation] = useState('');
     const [loadingAI, setLoadingAI] = useState(false);
     const [goals, setGoals] = useState('');
+    const [showExportMenu, setShowExportMenu] = useState(false);
+
+    // Load pinned profile on start
+    useEffect(() => {
+        const pinned = getPinnedProfile();
+        if (pinned) {
+            setLaSoData(pinned.laSo);
+            setInterpretation(pinned.interpretation || '');
+            setFortuneScore(calcFortuneScore(pinned.laSo));
+            setMonthlyData(getMonthlyFortune(pinned.laSo));
+            setDaiVanData(getDaiVan(pinned.laSo));
+        }
+    }, []);
 
     const handleFormSubmit = async (formData) => {
         const data = lapLaSo(
@@ -52,6 +71,40 @@ const App = () => {
         const result = await generateInterpretation(data, 2026, formData.goal);
         setInterpretation(result);
         setLoadingAI(false);
+    };
+
+    const handleRegenerateAI = async () => {
+        if (!laSoData) return;
+        setLoadingAI(true);
+        const result = await generateInterpretation(laSoData, 2026, goals);
+        setInterpretation(result);
+        setLoadingAI(false);
+    };
+
+    const handleSelectProfile = (profile) => {
+        setLaSoData(profile.laSo);
+        setInterpretation(profile.interpretation || '');
+        setFortuneScore(calcFortuneScore(profile.laSo));
+        setMonthlyData(getMonthlyFortune(profile.laSo));
+        setDaiVanData(getDaiVan(profile.laSo));
+        setScreen('result');
+    };
+
+    const handleSaveProfile = () => {
+        if (laSoData) {
+            saveProfile(laSoData, interpretation);
+            alert('Đã lưu hồ sơ thành công!');
+        }
+    };
+
+    const handleExportPDF = () => {
+        exportToPDF(laSoData, interpretation, fortuneScore);
+        setShowExportMenu(false);
+    };
+
+    const handleExportText = () => {
+        downloadAsText(laSoData, interpretation);
+        setShowExportMenu(false);
     };
 
     return (
@@ -88,13 +141,19 @@ const App = () => {
                                 TỬ VI <br />VẬN HẠN <span className="text-primary">2026</span>
                             </h1>
                             <p className="text-slate-500 dark:text-slate-400">
-                                Khám phá hành trình định mệnh và nắm bắt vận may trong năm Bính Ngọ.
+                                Hệ thống luận giải nâng cấp: Tử Vi Đẩu Số + Tứ Hóa + Bát Tự + Kỳ Môn Độn Giáp
                             </p>
                             <button
                                 onClick={() => setScreen('form')}
                                 className="w-full mt-8 py-4 bg-primary text-white font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
                             >
-                                Bắt đầu ngay <ChevronRight className="w-5 h-5" />
+                                Lập Lá Số Ngay <ChevronRight className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setScreen('profiles')}
+                                className="w-full py-3 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2"
+                            >
+                                <Users className="w-5 h-5" /> Quản lý hồ sơ
                             </button>
                         </div>
                     </motion.div>
@@ -114,8 +173,30 @@ const App = () => {
                     </motion.div>
                 )}
 
+                {/* Screen: Profiles */}
+                {screen === 'profiles' && (
+                    <motion.div
+                        key="profiles"
+                        initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                    >
+                        <div className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 flex items-center gap-4 border-b border-slate-100 dark:border-slate-800">
+                            <button onClick={() => setScreen('welcome')} className="p-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <h1 className="text-lg font-black uppercase tracking-tight">Hồ sơ đã lưu</h1>
+                        </div>
+                        <ProfileManager
+                            onSelectProfile={handleSelectProfile}
+                            onNewProfile={() => setScreen('form')}
+                            currentLaSo={laSoData}
+                            currentInterpretation={interpretation}
+                            fortuneScore={fortuneScore}
+                        />
+                    </motion.div>
+                )}
+
                 {/* Screen: Result */}
-                {screen === 'result' && (
+                {screen === 'result' && laSoData && (
                     <motion.div
                         key="result"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -126,10 +207,35 @@ const App = () => {
                             <button onClick={() => setScreen('form')} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
-                            <h2 className="font-black uppercase tracking-tight text-sm">Lá Số {laSoData.info.hoTen}</h2>
-                            <button onClick={() => setScreen('welcome')} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                                <History className="w-5 h-5" />
-                            </button>
+                            <h2 className="font-black uppercase tracking-tight text-sm">{laSoData.info.hoTen || 'Lá Số'}</h2>
+                            <div className="relative">
+                                <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                                    <Share2 className="w-5 h-5" />
+                                </button>
+
+                                {/* Export Menu */}
+                                <AnimatePresence>
+                                    {showExportMenu && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                            className="absolute right-0 top-12 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden z-50 w-48"
+                                        >
+                                            <button onClick={handleSaveProfile} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left">
+                                                <Download className="w-4 h-4 text-primary" />
+                                                <span className="text-sm font-bold">Lưu hồ sơ</span>
+                                            </button>
+                                            <button onClick={handleExportPDF} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
+                                                <FileText className="w-4 h-4 text-blue-500" />
+                                                <span className="text-sm font-bold">Xuất PDF</span>
+                                            </button>
+                                            <button onClick={handleExportText} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
+                                                <FileText className="w-4 h-4 text-green-500" />
+                                                <span className="text-sm font-bold">Xuất TXT</span>
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
 
                         {/* Tab Navigation */}
@@ -144,6 +250,28 @@ const App = () => {
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-24">
                             {tab === 'overview' && (
                                 <div className="space-y-6">
+                                    {/* Info Summary */}
+                                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl text-white">
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Năm sinh</span>
+                                                <p className="font-bold">{laSoData.info.tenNamAm}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Mệnh</span>
+                                                <p className="font-bold text-primary">{laSoData.info.banMenh}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Cục</span>
+                                                <p className="font-bold">{laSoData.info.tenCuc}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Giờ sinh</span>
+                                                <p className="font-bold">{laSoData.info.gioChi}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Luck Score Gauge */}
                                     <div className="flex flex-col items-center justify-center py-4 px-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
                                         <div className="relative flex items-center justify-center">
@@ -155,16 +283,13 @@ const App = () => {
                                                 ></motion.circle>
                                             </svg>
                                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm Vận Khí</span>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm Vận Khí 2026</span>
                                                 <span className="text-6xl font-black text-primary leading-none">{fortuneScore}</span>
                                                 <span className="text-sm font-bold text-slate-800 dark:text-white">
                                                     {fortuneScore > 80 ? "Đại Cát" : fortuneScore > 60 ? "Cát Tường" : fortuneScore > 40 ? "Bình Hòa" : "Cần Thận Trọng"}
                                                 </span>
                                             </div>
                                         </div>
-                                        <p className="mt-4 text-center text-xs text-slate-500 leading-relaxed font-medium">
-                                            Năm Bính Ngọ 2026 mang đến luồng sinh khí mạnh mẽ cho bản mệnh. Đây là thời kỳ quan trọng để tích lũy và bứt phá.
-                                        </p>
                                     </div>
 
                                     {/* Monthly Trend Chart */}
@@ -174,7 +299,6 @@ const App = () => {
                                                 <h3 className="text-base font-black uppercase tracking-tight">Thịnh Suy Theo Tháng</h3>
                                                 <p className="text-[10px] font-bold text-slate-400">Biểu đồ biến thiên vận thế 12 tháng</p>
                                             </div>
-                                            <span className="text-primary font-black text-xs">+15% vs 2025</span>
                                         </div>
                                         <div className="relative h-32 w-full mb-4">
                                             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
@@ -195,17 +319,26 @@ const App = () => {
 
                                     {/* AI Interpretation */}
                                     <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center gap-2 mb-4 text-primary">
-                                            <Sparkles className="w-5 h-5 fill-current" />
-                                            <h3 className="font-black uppercase tracking-tight">Luận giải AI</h3>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2 text-primary">
+                                                <Sparkles className="w-5 h-5 fill-current" />
+                                                <h3 className="font-black uppercase tracking-tight">Luận Giải Nâng Cấp</h3>
+                                            </div>
+                                            <button
+                                                onClick={handleRegenerateAI}
+                                                disabled={loadingAI}
+                                                className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 disabled:opacity-50"
+                                            >
+                                                <RefreshCw className={`w-3 h-3 ${loadingAI ? 'animate-spin' : ''}`} /> Tạo lại
+                                            </button>
                                         </div>
                                         {loadingAI ? (
                                             <div className="flex flex-col items-center justify-center py-10 gap-3">
                                                 <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="text-xs font-bold text-slate-400">Gemini đang phân tích lá số...</p>
+                                                <p className="text-xs font-bold text-slate-400">Đang phân tích theo 5 bước luận giải...</p>
                                             </div>
                                         ) : (
-                                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-primary prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base">
                                                 <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                                                     {interpretation}
                                                 </div>
@@ -277,6 +410,7 @@ const App = () => {
                             <NavButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={<Calendar className="w-6 h-6" />} label="Tháng" />
                             <NavButton active={tab === '10year'} onClick={() => setTab('10year')} icon={<ChartIcon className="w-6 h-6" />} label="Đại vận" />
                             <NavButton active={tab === 'chart'} onClick={() => setTab('chart')} icon={<Settings className="w-6 h-6" />} label="Lá số" />
+                            <NavButton active={false} onClick={() => setScreen('profiles')} icon={<Users className="w-6 h-6" />} label="Hồ sơ" />
                         </div>
                     </motion.div>
                 )}
