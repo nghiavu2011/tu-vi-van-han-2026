@@ -207,7 +207,14 @@ const App = () => {
                             <button onClick={() => setScreen('form')} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
-                            <h2 className="font-black uppercase tracking-tight text-sm">{laSoData.info.hoTen || 'Lá Số'}</h2>
+                            <div className="flex flex-col items-center">
+                                <h2 className="font-black uppercase tracking-tight text-sm">{laSoData.info.hoTen || 'Lá Số'}</h2>
+                                {goals && (
+                                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1">
+                                        Mục tiêu: {goals === 'career' ? 'Sự nghiệp' : goals === 'finance' ? 'Tài chính' : goals === 'relation' ? 'Tình duyên' : 'Sức khỏe'}
+                                    </span>
+                                )}
+                            </div>
                             <div className="relative">
                                 <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                     <Share2 className="w-5 h-5" />
