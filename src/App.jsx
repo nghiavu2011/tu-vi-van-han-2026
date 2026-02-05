@@ -22,7 +22,8 @@ import {
     Share2,
     CheckCircle2,
     AlertTriangle,
-    RefreshCw
+    RefreshCw,
+    Target
 } from 'lucide-react';
 
 const App = () => {
@@ -107,8 +108,18 @@ const App = () => {
         setShowExportMenu(false);
     };
 
+    const getGoalLabel = (g) => {
+        const map = {
+            'career': 'Sự nghiệp',
+            'finance': 'Tài chính',
+            'relation': 'Tình duyên',
+            'health': 'Sức khỏe'
+        };
+        return map[g] || 'Tổng quan';
+    };
+
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display">
+        <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
             <AnimatePresence mode="wait">
 
                 {/* Screen: Welcome */}
@@ -118,42 +129,38 @@ const App = () => {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="relative flex h-screen w-full flex-col overflow-hidden items-center justify-center p-6 text-center"
                     >
-                        <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-10">
-                            <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-primary/30 to-transparent"></div>
-                            <div className="absolute top-20 -left-10 w-40 h-40 border-[1px] border-primary rounded-full"></div>
+                        {/* Background Elements */}
+                        <div className="absolute inset-0 pointer-events-none opacity-10">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-red-500 rounded-full blur-[100px]"></div>
+                            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-[100px]"></div>
                         </div>
 
-                        <div className="relative w-64 h-64 mb-8 flex items-center justify-center">
-                            <motion.div
-                                animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                className="absolute inset-0 border border-primary/20 rounded-full flex items-center justify-center"
-                            >
-                                <div className="w-48 h-48 border border-primary/40 rounded-full"></div>
-                            </motion.div>
-                            <Sparkles className="w-24 h-24 text-primary" />
-                        </div>
-
-                        <div className="z-10 space-y-4 max-w-sm">
-                            <div className="inline-flex px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-2">
-                                Năm Bính Ngọ 2026
+                        <div className="relative z-10 max-w-md w-full">
+                            <div className="flex justify-center mb-6">
+                                <div className="w-24 h-24 bg-gradient-to-tr from-red-600 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl rotate-3">
+                                    <Sparkles className="w-12 h-12 text-white" />
+                                </div>
                             </div>
-                            <h1 className="text-5xl font-black tracking-tight leading-tight">
-                                TỬ VI <br />VẬN HẠN <span className="text-primary">2026</span>
+
+                            <h1 className="text-4xl sm:text-5xl font-black tracking-tighter mb-2">
+                                TỬ VI 2026
                             </h1>
-                            <p className="text-slate-500 dark:text-slate-400">
-                                Hệ thống luận giải nâng cấp: Tử Vi Đẩu Số + Tứ Hóa + Bát Tự + Kỳ Môn Độn Giáp
+                            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-8">
+                                Luận giải Thiên Lương &amp; Kỷ nguyên số
                             </p>
+
                             <button
                                 onClick={() => setScreen('form')}
-                                className="w-full mt-8 py-4 bg-primary text-white font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-wider rounded-xl shadow-lg hover:bg-red-700 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                             >
-                                Lập Lá Số Ngay <ChevronRight className="w-5 h-5" />
+                                Lập Lá Số <ChevronRight className="w-5 h-5" />
                             </button>
+
                             <button
                                 onClick={() => setScreen('profiles')}
-                                className="w-full py-3 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2"
+                                className="w-full mt-3 py-4 bg-slate-100 text-slate-800 font-bold uppercase tracking-wider rounded-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
                             >
-                                <Users className="w-5 h-5" /> Quản lý hồ sơ
+                                <Users className="w-5 h-5" /> Hồ sơ đã lưu
                             </button>
                         </div>
                     </motion.div>
@@ -164,12 +171,14 @@ const App = () => {
                     <motion.div
                         key="form"
                         initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
-                        className="min-h-screen flex flex-col p-6 items-center"
+                        className="min-h-screen p-4 flex flex-col items-center"
                     >
-                        <button onClick={() => setScreen('welcome')} className="self-start mb-8 p-2 rounded-full bg-slate-100 dark:bg-slate-800">
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                        <FormLaSo onSubmit={handleFormSubmit} />
+                        <div className="w-full max-w-md">
+                            <button onClick={() => setScreen('welcome')} className="mb-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 w-fit">
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <FormLaSo onSubmit={handleFormSubmit} />
+                        </div>
                     </motion.div>
                 )}
 
@@ -179,8 +188,8 @@ const App = () => {
                         key="profiles"
                         initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
                     >
-                        <div className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 flex items-center gap-4 border-b border-slate-100 dark:border-slate-800">
-                            <button onClick={() => setScreen('welcome')} className="p-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md p-4 flex items-center gap-4 border-b border-slate-100">
+                            <button onClick={() => setScreen('welcome')} className="p-2 rounded-full bg-slate-100">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <h1 className="text-lg font-black uppercase tracking-tight">Hồ sơ đã lưu</h1>
@@ -203,20 +212,23 @@ const App = () => {
                         className="flex flex-col h-screen overflow-hidden max-w-[1000px] mx-auto bg-white dark:bg-slate-950 shadow-2xl"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
-                            <button onClick={() => setScreen('form')} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md sticky top-0 z-20">
+                            <button onClick={() => setScreen('form')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
+
                             <div className="flex flex-col items-center">
                                 <h2 className="font-black uppercase tracking-tight text-sm">{laSoData.info.hoTen || 'Lá Số'}</h2>
                                 {goals && (
-                                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1">
-                                        Mục tiêu: {goals === 'career' ? 'Sự nghiệp' : goals === 'finance' ? 'Tài chính' : goals === 'relation' ? 'Tình duyên' : 'Sức khỏe'}
-                                    </span>
+                                    <div className="flex items-center gap-1 mt-0.5 px-2 py-0.5 bg-red-50 text-red-600 rounded-full text-[10px] font-bold uppercase">
+                                        <Target className="w-3 h-3" />
+                                        Mục tiêu: {getGoalLabel(goals)}
+                                    </div>
                                 )}
                             </div>
+
                             <div className="relative">
-                                <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                                <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                     <Share2 className="w-5 h-5" />
                                 </button>
 
@@ -224,20 +236,17 @@ const App = () => {
                                 <AnimatePresence>
                                     {showExportMenu && (
                                         <motion.div
-                                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                            className="absolute right-0 top-12 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden z-50 w-48"
+                                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                                            className="absolute right-0 top-12 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 w-48 z-50 overflow-hidden"
                                         >
-                                            <button onClick={handleSaveProfile} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left">
-                                                <Download className="w-4 h-4 text-primary" />
-                                                <span className="text-sm font-bold">Lưu hồ sơ</span>
+                                            <button onClick={handleSaveProfile} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left text-sm font-bold">
+                                                <Download className="w-4 h-4 text-blue-500" /> Lưu hồ sơ
                                             </button>
-                                            <button onClick={handleExportPDF} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
-                                                <FileText className="w-4 h-4 text-blue-500" />
-                                                <span className="text-sm font-bold">Xuất PDF</span>
+                                            <button onClick={handleExportPDF} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left text-sm font-bold border-t border-slate-100 dark:border-slate-800">
+                                                <FileText className="w-4 h-4 text-red-500" /> Xuất PDF
                                             </button>
-                                            <button onClick={handleExportText} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
-                                                <FileText className="w-4 h-4 text-green-500" />
-                                                <span className="text-sm font-bold">Xuất TXT</span>
+                                            <button onClick={handleExportText} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left text-sm font-bold border-t border-slate-100 dark:border-slate-800">
+                                                <FileText className="w-4 h-4 text-green-500" /> Xuất TXT
                                             </button>
                                         </motion.div>
                                     )}
@@ -245,108 +254,42 @@ const App = () => {
                             </div>
                         </div>
 
-                        {/* Tab Navigation */}
-                        <div className="flex bg-slate-50 dark:bg-slate-900/50 p-1 m-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <TabButton active={tab === 'overview'} onClick={() => setTab('overview')} icon={<Layout className="w-4 h-4" />} label="Tổng quan" />
-                            <TabButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={<Calendar className="w-4 h-4" />} label="Tháng" />
-                            <TabButton active={tab === '10year'} onClick={() => setTab('10year')} icon={<ChartIcon className="w-4 h-4" />} label="Đại vận" />
-                            <TabButton active={tab === 'chart'} onClick={() => setTab('chart')} icon={<ChartIcon className="w-4 h-4" />} label="12 Cung" />
-                        </div>
-
                         {/* Content Area */}
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-24">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pb-24 bg-slate-50 dark:bg-black">
                             {tab === 'overview' && (
-                                <div className="space-y-6">
-                                    {/* Info Summary */}
-                                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl text-white">
-                                        <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div>
-                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Năm sinh</span>
-                                                <p className="font-bold">{laSoData.info.tenNamAm}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Mệnh</span>
-                                                <p className="font-bold text-primary">{laSoData.info.banMenh}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Cục</span>
-                                                <p className="font-bold">{laSoData.info.tenCuc}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-slate-400 text-[10px] uppercase tracking-wider">Giờ sinh</span>
-                                                <p className="font-bold">{laSoData.info.gioChi}</p>
-                                            </div>
+                                <div className="p-4 space-y-4">
+                                    {/* Quick Stats */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Điểm Vận</span>
+                                            <span className="text-4xl font-black text-red-600">{fortuneScore}</span>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Xu Hướng</span>
+                                            <span className="text-lg font-black text-slate-800 dark:text-white uppercase">
+                                                {fortuneScore > 50 ? 'Khả quan' : 'Thận Trọng'}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    {/* Luck Score Gauge */}
-                                    <div className="flex flex-col items-center justify-center py-4 px-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                        <div className="relative flex items-center justify-center">
-                                            <svg className="w-56 h-56 transform -rotate-90">
-                                                <circle className="text-slate-100 dark:text-slate-800" cx="112" cy="112" fill="transparent" r="95" stroke="currentColor" strokeWidth="8"></circle>
-                                                <motion.circle
-                                                    initial={{ strokeDashoffset: 597 }} animate={{ strokeDashoffset: 597 - (597 * fortuneScore / 100) }}
-                                                    className="text-primary" cx="112" cy="112" fill="transparent" r="95" stroke="currentColor" strokeDasharray="597" strokeLinecap="round" strokeWidth="12"
-                                                ></motion.circle>
-                                            </svg>
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm Vận Khí 2026</span>
-                                                <span className="text-6xl font-black text-primary leading-none">{fortuneScore}</span>
-                                                <span className="text-sm font-bold text-slate-800 dark:text-white">
-                                                    {fortuneScore > 80 ? "Đại Cát" : fortuneScore > 60 ? "Cát Tường" : fortuneScore > 40 ? "Bình Hòa" : "Cần Thận Trọng"}
-                                                </span>
-                                            </div>
+                                    {/* AI Content */}
+                                    <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="flex items-center gap-2 text-sm font-black uppercase text-slate-800 dark:text-white">
+                                                <Sparkles className="w-4 h-4 text-yellow-500" />
+                                                Luận Giải Chi Tiết
+                                            </h3>
+                                            {loadingAI && <RefreshCw className="w-4 h-4 animate-spin text-slate-400" />}
                                         </div>
-                                    </div>
 
-                                    {/* Monthly Trend Chart */}
-                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                                        <div className="flex justify-between items-end mb-6">
-                                            <div>
-                                                <h3 className="text-base font-black uppercase tracking-tight">Thịnh Suy Theo Tháng</h3>
-                                                <p className="text-[10px] font-bold text-slate-400">Biểu đồ biến thiên vận thế 12 tháng</p>
-                                            </div>
-                                        </div>
-                                        <div className="relative h-32 w-full mb-4">
-                                            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
-                                                <line className="text-slate-100 dark:text-slate-800" stroke="currentColor" strokeDasharray="4" x1="0" x2="400" y1="75" y2="75"></line>
-                                                <path d="M0,100 C40,100 60,30 100,30 C140,30 160,120 200,120 C240,120 260,10 300,10 C340,10 360,60 400,60" fill="none" stroke="url(#gradient-line)" strokeLinecap="round" strokeWidth="6"></path>
-                                                <defs>
-                                                    <linearGradient id="gradient-line" x1="0%" x2="100%" y1="0%" y2="0%">
-                                                        <stop offset="0%" stopColor="#f59f0a"></stop>
-                                                        <stop offset="100%" stopColor="#fbbf24"></stop>
-                                                    </linearGradient>
-                                                </defs>
-                                            </svg>
-                                        </div>
-                                        <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                            {['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'].map(t => <span key={t}>{t}</span>)}
-                                        </div>
-                                    </div>
-
-                                    {/* AI Interpretation */}
-                                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-2 text-primary">
-                                                <Sparkles className="w-5 h-5 fill-current" />
-                                                <h3 className="font-black uppercase tracking-tight">Luận Giải Nâng Cấp</h3>
-                                            </div>
-                                            <button
-                                                onClick={handleRegenerateAI}
-                                                disabled={loadingAI}
-                                                className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 disabled:opacity-50"
-                                            >
-                                                <RefreshCw className={`w-3 h-3 ${loadingAI ? 'animate-spin' : ''}`} /> Tạo lại
-                                            </button>
-                                        </div>
                                         {loadingAI ? (
-                                            <div className="flex flex-col items-center justify-center py-10 gap-3">
-                                                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="text-xs font-bold text-slate-400">Đang phân tích theo 5 bước luận giải...</p>
+                                            <div className="py-12 text-center">
+                                                <div className="w-8 h-8 mx-auto border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase">Đang phân tích dữ liệu...</p>
                                             </div>
                                         ) : (
-                                            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-primary prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base">
-                                                <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-black prose-headings:uppercase prose-p:text-slate-600 dark:prose-p:text-slate-300">
+                                                <div className="whitespace-pre-wrap text-[13px] leading-relaxed">
                                                     {interpretation}
                                                 </div>
                                             </div>
@@ -356,48 +299,28 @@ const App = () => {
                             )}
 
                             {tab === 'monthly' && (
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="p-4 space-y-3">
                                     {monthlyData.map((m, i) => (
-                                        <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:border-primary/30 transition-all group">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="bg-primary/10 p-2.5 rounded-lg text-primary">
-                                                        <Calendar className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-tight">{m.name}</h3>
-                                                        <p className="text-[10px] text-slate-400 font-bold">{m.canChi} - {m.tiet}</p>
-                                                    </div>
-                                                </div>
-                                                <div className={`text-xs font-black px-2 py-1 rounded ${m.score > 70 ? 'bg-green-100 text-green-700' : m.score > 50 ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                                                    {m.score}đ
-                                                </div>
+                                        <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-sm font-black uppercase">{m.name}</span>
+                                                <span className={`text-[10px] font-bold px-2 py-1 rounded ${m.score > 60 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{m.score}đ</span>
                                             </div>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                                                {m.desc}
-                                            </p>
-                                            <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-50 dark:border-slate-800">
-                                                <div className="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg text-[10px] font-bold text-green-600">
-                                                    <CheckCircle2 className="w-3 h-3" /> CƠ HỘI: {m.opportunity}
-                                                </div>
-                                                <div className="flex items-center gap-1 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-lg text-[10px] font-bold text-primary">
-                                                    <AlertTriangle className="w-3 h-3" /> RỦI RO: {m.risk}
-                                                </div>
-                                            </div>
+                                            <p className="text-xs text-slate-500">{m.desc}</p>
                                         </div>
                                     ))}
                                 </div>
                             )}
 
                             {tab === '10year' && (
-                                <div className="space-y-4">
+                                <div className="p-4 space-y-4">
                                     {daiVanData.map((d, i) => (
-                                        <div key={i} className="relative pl-8 pb-8 border-l-2 border-slate-100 dark:border-slate-800 last:pb-0">
-                                            <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-primary border-4 border-white dark:border-slate-950"></div>
-                                            <div className="bg-slate-50 dark:bg-slate-900/30 p-4 rounded-xl">
-                                                <div className="text-sm font-black text-primary mb-1">{d.range}</div>
-                                                <h4 className="font-bold text-slate-800 dark:text-white mb-2">{d.theme}</h4>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">{d.desc}</p>
+                                        <div key={i} className="relative pl-6 pb-6 border-l-2 border-slate-200 last:border-0">
+                                            <span className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                            <div className="text-xs font-black text-red-600 mb-1">{d.range}</div>
+                                            <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                                                <div className="font-bold text-sm mb-1">{d.theme}</div>
+                                                <p className="text-xs text-slate-500">{d.desc}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -405,19 +328,18 @@ const App = () => {
                             )}
 
                             {tab === 'chart' && (
-                                <div className="overflow-x-auto">
+                                <div className="p-2 overflow-x-auto min-h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900">
                                     <LaSo data={laSoData} />
                                 </div>
                             )}
                         </div>
 
                         {/* Bottom Nav */}
-                        <div className="flex justify-around items-center p-4 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md fixed bottom-0 left-0 right-0 max-w-[1000px] mx-auto">
-                            <NavButton active={tab === 'overview'} onClick={() => setTab('overview')} icon={<Layout className="w-6 h-6" />} label="Tổng quan" />
-                            <NavButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={<Calendar className="w-6 h-6" />} label="Tháng" />
-                            <NavButton active={tab === '10year'} onClick={() => setTab('10year')} icon={<ChartIcon className="w-6 h-6" />} label="Đại vận" />
-                            <NavButton active={tab === 'chart'} onClick={() => setTab('chart')} icon={<Settings className="w-6 h-6" />} label="Lá số" />
-                            <NavButton active={false} onClick={() => setScreen('profiles')} icon={<Users className="w-6 h-6" />} label="Hồ sơ" />
+                        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 flex justify-around max-w-[1000px] mx-auto z-50">
+                            <NavButton active={tab === 'overview'} onClick={() => setTab('overview')} icon={<Layout className="w-5 h-5" />} label="Tổng quan" />
+                            <NavButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={<Calendar className="w-5 h-5" />} label="Tháng" />
+                            <NavButton active={tab === '10year'} onClick={() => setTab('10year')} icon={<ChartIcon className="w-5 h-5" />} label="Đại vận" />
+                            <NavButton active={tab === 'chart'} onClick={() => setTab('chart')} icon={<Settings className="w-5 h-5" />} label="Lá số" />
                         </div>
                     </motion.div>
                 )}
@@ -426,22 +348,13 @@ const App = () => {
     );
 };
 
-const TabButton = ({ active, onClick, icon, label }) => (
-    <button
-        onClick={onClick}
-        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${active ? 'bg-white dark:bg-slate-800 shadow-sm text-primary' : 'text-slate-400'}`}
-    >
-        {icon} {label}
-    </button>
-);
-
 const NavButton = ({ active, onClick, icon, label }) => (
     <button
         onClick={onClick}
-        className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-primary' : 'text-slate-400'}`}
+        className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${active ? 'text-red-600 bg-red-50' : 'text-slate-400 hover:bg-slate-50'}`}
     >
         {icon}
-        <span className="text-[10px] font-bold uppercase tracking-tighter">{label}</span>
+        <span className="text-[9px] font-bold uppercase tracking-tight">{label}</span>
     </button>
 );
 
