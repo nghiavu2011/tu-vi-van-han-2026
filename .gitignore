@@ -26,3 +26,4 @@ dist-ssr
 # UI Temp
 ui_temp/
 *.zip
+.vercel

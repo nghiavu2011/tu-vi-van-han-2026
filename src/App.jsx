@@ -144,27 +144,53 @@ const App = () => {
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-24">
                             {tab === 'overview' && (
                                 <div className="space-y-6">
-                                    {/* Score Card */}
-                                    <div className="bg-gradient-to-br from-primary to-orange-600 p-6 rounded-2xl text-white shadow-xl">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <span className="text-xs font-black uppercase tracking-widest opacity-80">Chỉ số vận khí 2026</span>
-                                            <div className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold">Bính Ngọ</div>
+                                    {/* Luck Score Gauge */}
+                                    <div className="flex flex-col items-center justify-center py-4 px-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                        <div className="relative flex items-center justify-center">
+                                            <svg className="w-56 h-56 transform -rotate-90">
+                                                <circle className="text-slate-100 dark:text-slate-800" cx="112" cy="112" fill="transparent" r="95" stroke="currentColor" strokeWidth="8"></circle>
+                                                <motion.circle
+                                                    initial={{ strokeDashoffset: 597 }} animate={{ strokeDashoffset: 597 - (597 * fortuneScore / 100) }}
+                                                    className="text-primary" cx="112" cy="112" fill="transparent" r="95" stroke="currentColor" strokeDasharray="597" strokeLinecap="round" strokeWidth="12"
+                                                ></motion.circle>
+                                            </svg>
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm Vận Khí</span>
+                                                <span className="text-6xl font-black text-primary leading-none">{fortuneScore}</span>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-white">
+                                                    {fortuneScore > 80 ? "Đại Cát" : fortuneScore > 60 ? "Cát Tường" : fortuneScore > 40 ? "Bình Hòa" : "Cần Thận Trọng"}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-end gap-3">
-                                            <div className="text-6xl font-black">{fortuneScore}</div>
-                                            <div className="mb-2 text-sm font-bold opacity-80">/ 100 điểm</div>
-                                        </div>
-                                        <div className="mt-4 bg-white/10 h-2 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }} animate={{ width: `${fortuneScore}%` }}
-                                                className="h-full bg-white"
-                                            />
-                                        </div>
-                                        <p className="mt-4 text-xs font-medium leading-relaxed opacity-90">
-                                            {fortuneScore > 70 ? "Một năm rực rỡ với nhiều bước tiến quan trọng." :
-                                                fortuneScore > 50 ? "Vận trình ổn định, cần nỗ lực bền bỉ để đạt kết quả." :
-                                                    "Cần cẩn trọng trong mọi quyết định, đề phòng rủi ro."}
+                                        <p className="mt-4 text-center text-xs text-slate-500 leading-relaxed font-medium">
+                                            Năm Bính Ngọ 2026 mang đến luồng sinh khí mạnh mẽ cho bản mệnh. Đây là thời kỳ quan trọng để tích lũy và bứt phá.
                                         </p>
+                                    </div>
+
+                                    {/* Monthly Trend Chart */}
+                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                        <div className="flex justify-between items-end mb-6">
+                                            <div>
+                                                <h3 className="text-base font-black uppercase tracking-tight">Thịnh Suy Theo Tháng</h3>
+                                                <p className="text-[10px] font-bold text-slate-400">Biểu đồ biến thiên vận thế 12 tháng</p>
+                                            </div>
+                                            <span className="text-primary font-black text-xs">+15% vs 2025</span>
+                                        </div>
+                                        <div className="relative h-32 w-full mb-4">
+                                            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
+                                                <line className="text-slate-100 dark:text-slate-800" stroke="currentColor" strokeDasharray="4" x1="0" x2="400" y1="75" y2="75"></line>
+                                                <path d="M0,100 C40,100 60,30 100,30 C140,30 160,120 200,120 C240,120 260,10 300,10 C340,10 360,60 400,60" fill="none" stroke="url(#gradient-line)" strokeLinecap="round" strokeWidth="6"></path>
+                                                <defs>
+                                                    <linearGradient id="gradient-line" x1="0%" x2="100%" y1="0%" y2="0%">
+                                                        <stop offset="0%" stopColor="#f59f0a"></stop>
+                                                        <stop offset="100%" stopColor="#fbbf24"></stop>
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                        </div>
+                                        <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                            {['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'].map(t => <span key={t}>{t}</span>)}
+                                        </div>
                                     </div>
 
                                     {/* AI Interpretation */}
