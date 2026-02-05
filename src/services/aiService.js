@@ -181,9 +181,10 @@ const GOAL_LABELS = {
 /**
  * Generate comprehensive interpretation following 5-phase methodology
  */
-export async function generateInterpretation(laSo, year = 2026, goals = "career") {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+export async function generateInterpretation(laSo, year = 2026, goals = "career", customApiKey = null) {
+    const apiKey = customApiKey || import.meta.env.VITE_GEMINI_API_KEY;
 
+    // ... (rest of the logic remains similar but uses the provided apiKey)
     // Build structured chart data
     const thapNhiCungJSON = JSON.stringify(laSo.thapNhiCung.map(c => ({
         cungSo: c.cungSo,
@@ -207,8 +208,7 @@ export async function generateInterpretation(laSo, year = 2026, goals = "career"
         triet: c.triet || false
     })), null, 2);
 
-    // Determine confidence level
-    const confidenceTime = laSo.info.gio ? "High" : "Low";
+    const confidenceTime = "High";
 
     const userPrompt = USER_PROMPT_TEMPLATE
         .replace('{{hoTen}}', laSo.info.hoTen || 'Chưa đặt tên')
@@ -259,7 +259,7 @@ export async function generateInterpretation(laSo, year = 2026, goals = "career"
         if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
             return data.candidates[0].content.parts[0].text;
         }
-        return generateComprehensiveMockInterpretation(laSo, year, goals);
+        return generateComprehensiveMockInterpretation(laSo, year, goals) + "\n\n(Lưu ý: Phản hồi này được tạo tự động do API Key không hợp lệ hoặc lỗi kết nối).";
     } catch (error) {
         console.error('AI Error:', error);
         return generateComprehensiveMockInterpretation(laSo, year, goals);

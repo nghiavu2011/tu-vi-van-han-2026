@@ -25,24 +25,23 @@ const GRID_MAP = {
 };
 
 // Coordinates for Tuan/Triet markers (percentage based on 4x4 grid)
-// Keys are the "Start" Cung ID of the pair (clockwise). e.g., '6' means between Tỵ(6) and Ngọ(7).
+// Keys represent the starting Cung index for a border (clockwise).
 const BORDER_COORDS = {
-    6: { top: '12%', left: '25%', vertical: true },   // Ty-Ngo
-    7: { top: '12%', left: '50%', vertical: true },   // Ngo-Mui
-    8: { top: '12%', left: '75%', vertical: true },   // Mui-Than
-    9: { top: '25%', left: '88%', vertical: false },  // Than-Dau
-    10: { top: '50%', left: '88%', vertical: false }, // Dau-Tuat
-    11: { top: '75%', left: '88%', vertical: false }, // Tuat-Hoi
-    12: { top: '88%', left: '75%', vertical: true },  // Hoi-Ty
-    1: { top: '88%', left: '50%', vertical: true },   // Ty-Suu
-    2: { top: '88%', left: '25%', vertical: true },   // Suu-Dan
-    3: { top: '75%', left: '12%', vertical: false },  // Dan-Mao
-    4: { top: '50%', left: '12%', vertical: false },  // Mao-Thin
-    5: { top: '25%', left: '12%', vertical: false },  // Thin-Ty
+    6: { top: '12.5%', left: '25%', vertical: true },   // Giữa Tỵ (6) và Ngọ (7) -> X=25%, Y=12.5%
+    7: { top: '12.5%', left: '50%', vertical: true },   // Ngọ-Mùi
+    8: { top: '12.5%', left: '75%', vertical: true },   // Mùi-Thân
+    9: { top: '25%', left: '87.5%', vertical: false },  // Thân-Dậu -> Y=25%, X=87.5%
+    10: { top: '50%', left: '87.5%', vertical: false }, // Dậu-Tuất
+    11: { top: '75%', left: '87.5%', vertical: false }, // Tuất-Hợi
+    12: { top: '87.5%', left: '75%', vertical: true },  // Hợi-Tý -> X=75%, Y=87.5%
+    1: { top: '87.5%', left: '50%', vertical: true },   // Tý-Sửu
+    2: { top: '87.5%', left: '25%', vertical: true },   // Sửu-Dần
+    3: { top: '75%', left: '12.5%', vertical: false },  // Dần-Mão -> Y=75%, X=12.5%
+    4: { top: '50%', left: '12.5%', vertical: false },  // Mão-Thìn
+    5: { top: '25%', left: '12.5%', vertical: false },  // Thìn-Tỵ
 };
 
 // Element Colors (Standard Tu Vi)
-// K=Kim(White/Gray), M=Moc(Green), T=Thuy(Black/Blue), H=Hoa(Red), O=Tho(Yellow/Brown)
 const ELEMENT_COLORS = {
     'K': 'text-slate-500 dark:text-slate-400 font-bold',
     'M': 'text-green-600 dark:text-green-400 font-bold',
@@ -51,7 +50,6 @@ const ELEMENT_COLORS = {
     'O': 'text-yellow-600 dark:text-yellow-400 font-bold',
 };
 
-// Star Element Mapping (Supplementary)
 const STAR_ELEMENTS = {
     'Tử vi': 'O', 'Liêm trinh': 'H', 'Thiên đồng': 'T', 'Vũ khúc': 'K', 'Thái dương': 'H',
     'Thiên cơ': 'M', 'Thiên phủ': 'O', 'Thái âm': 'T', 'Tham lang': 'T', 'Cự môn': 'T',
@@ -63,7 +61,6 @@ const STAR_ELEMENTS = {
 };
 
 const getStarColor = (starName, definedElement) => {
-    // Use defined element from data if available, else lookup, else default to Black
     const element = definedElement || STAR_ELEMENTS[starName] || STAR_ELEMENTS[starName.split(' ')[0]];
     return ELEMENT_COLORS[element] || 'text-slate-800 dark:text-slate-200 font-bold';
 };
@@ -74,19 +71,15 @@ const LaSo = ({ data }) => {
 
     // --- Helper to render Tuan/Triet markers ---
     const renderBarriers = (type) => {
-        // Find all cung IDs that have this barrier
-        const affectedIDs = thapNhiCung.filter(c => c[type.toLowerCase()]).map(c => c.cungSo);
-
-        // Find the "center" of the group. 
-        // Logic: Tuan/Triet usually affects a pair (e.g., 6 and 7). 
-        // We look for pairs (i, i+1) or (12, 1).
+        const key = type.toLowerCase();
+        // Cụm các cặp (id, id_next) bị ảnh hưởng
         const pairs = [];
-        affectedIDs.forEach(id => {
-            const nextId = id === 12 ? 1 : id + 1;
-            if (affectedIDs.includes(nextId)) {
-                pairs.push(id);
+        for (let i = 1; i <= 12; i++) {
+            const next = (i % 12) + 1;
+            if (thapNhiCung[i - 1][key] && thapNhiCung[next - 1][key]) {
+                pairs.push(i);
             }
-        });
+        }
 
         return pairs.map(startId => {
             const coords = BORDER_COORDS[startId];
@@ -95,14 +88,17 @@ const LaSo = ({ data }) => {
             return (
                 <div
                     key={`${type}-${startId}`}
-                    className="absolute z-20 flex items-center justify-center pointer-events-none"
+                    className="absolute z-30 flex items-center justify-center pointer-events-none"
                     style={{
                         top: coords.top,
                         left: coords.left,
                         transform: 'translate(-50%, -50%)'
                     }}
                 >
-                    <div className="bg-black text-white px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-tighter border border-white shadow-sm">
+                    <div className={clsx(
+                        "text-white px-1 py-0.5 text-[8px] sm:text-[10px] font-black uppercase tracking-tighter border border-white shadow-xl ring-1 ring-black/20",
+                        type === 'TUẦN' ? "bg-red-600" : "bg-black"
+                    )}>
                         {type}
                     </div>
                 </div>

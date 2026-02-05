@@ -36,6 +36,8 @@ const App = () => {
     const [loadingAI, setLoadingAI] = useState(false);
     const [goals, setGoals] = useState('');
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
+    const [showSettings, setShowSettings] = useState(false);
 
     // Load pinned profile on start
     useEffect(() => {
@@ -48,6 +50,12 @@ const App = () => {
             setDaiVanData(getDaiVan(pinned.laSo));
         }
     }, []);
+
+    const saveApiKey = (key) => {
+        setApiKey(key);
+        localStorage.setItem('gemini_api_key', key);
+        setShowSettings(false);
+    };
 
     const handleFormSubmit = async (formData) => {
         const data = lapLaSo(
@@ -68,7 +76,7 @@ const App = () => {
 
         // Auto generate AI interpretation
         setLoadingAI(true);
-        const result = await generateInterpretation(data, 2026, formData.goal);
+        const result = await generateInterpretation(data, 2026, formData.goal, apiKey);
         setInterpretation(result);
         setLoadingAI(false);
     };
@@ -76,7 +84,7 @@ const App = () => {
     const handleRegenerateAI = async () => {
         if (!laSoData) return;
         setLoadingAI(true);
-        const result = await generateInterpretation(laSoData, 2026, goals);
+        const result = await generateInterpretation(laSoData, 2026, goals, apiKey);
         setInterpretation(result);
         setLoadingAI(false);
     };
@@ -150,10 +158,10 @@ const App = () => {
                                 Lập Lá Số Ngay <ChevronRight className="w-5 h-5" />
                             </button>
                             <button
-                                onClick={() => setScreen('profiles')}
-                                className="w-full py-3 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2"
+                                onClick={() => setShowSettings(true)}
+                                className="w-full py-2 text-xs font-bold text-slate-400 hover:text-primary transition-all flex items-center justify-center gap-1 opacity-60 hover:opacity-100"
                             >
-                                <Users className="w-5 h-5" /> Quản lý hồ sơ
+                                <Settings className="w-3 h-3" /> Cấu hình API Gemini (AI)
                             </button>
                         </div>
                     </motion.div>
@@ -215,33 +223,38 @@ const App = () => {
                                     </span>
                                 )}
                             </div>
-                            <div className="relative">
-                                <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                                    <Share2 className="w-5 h-5" />
+                            <div className="flex items-center gap-1">
+                                <button onClick={() => setShowSettings(true)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-primary">
+                                    <Settings className="w-5 h-5" />
                                 </button>
+                                <div className="relative">
+                                    <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                                        <Share2 className="w-5 h-5" />
+                                    </button>
 
-                                {/* Export Menu */}
-                                <AnimatePresence>
-                                    {showExportMenu && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                            className="absolute right-0 top-12 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden z-50 w-48"
-                                        >
-                                            <button onClick={handleSaveProfile} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left">
-                                                <Download className="w-4 h-4 text-primary" />
-                                                <span className="text-sm font-bold">Lưu hồ sơ</span>
-                                            </button>
-                                            <button onClick={handleExportPDF} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
-                                                <FileText className="w-4 h-4 text-blue-500" />
-                                                <span className="text-sm font-bold">Xuất PDF</span>
-                                            </button>
-                                            <button onClick={handleExportText} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
-                                                <FileText className="w-4 h-4 text-green-500" />
-                                                <span className="text-sm font-bold">Xuất TXT</span>
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    {/* Export Menu */}
+                                    <AnimatePresence>
+                                        {showExportMenu && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                                className="absolute right-0 top-12 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden z-50 w-48"
+                                            >
+                                                <button onClick={handleSaveProfile} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left">
+                                                    <Download className="w-4 h-4 text-primary" />
+                                                    <span className="text-sm font-bold">Lưu hồ sơ</span>
+                                                </button>
+                                                <button onClick={handleExportPDF} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
+                                                    <FileText className="w-4 h-4 text-blue-500" />
+                                                    <span className="text-sm font-bold">Xuất PDF</span>
+                                                </button>
+                                                <button onClick={handleExportText} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left border-t border-slate-50 dark:border-slate-800">
+                                                    <FileText className="w-4 h-4 text-green-500" />
+                                                    <span className="text-sm font-bold">Xuất TXT</span>
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
 
@@ -420,6 +433,73 @@ const App = () => {
                             <NavButton active={false} onClick={() => setScreen('profiles')} icon={<Users className="w-6 h-6" />} label="Hồ sơ" />
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal: Settings */}
+            <AnimatePresence>
+                {showSettings && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800"
+                        >
+                            <div className="p-8">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                        <Settings className="w-7 h-7" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black uppercase tracking-tight">Cấu hình AI</h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tùy chọn API Cá nhân</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Google Gemini API Key</label>
+                                        <input
+                                            type="password"
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder="Nhập API Key của bạn..."
+                                            className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-xs space-y-3">
+                                        <p className="font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1">
+                                            <Sparkles className="w-3 h-3" /> Hướng dẫn lấy API Key:
+                                        </p>
+                                        <ol className="list-decimal list-inside text-slate-600 dark:text-slate-400 space-y-2 leading-relaxed">
+                                            <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-primary underline font-bold">Google API Studio</a></li>
+                                            <li>Nhấp vào nút <b>"Get API key"</b></li>
+                                            <li>Chọn <b>"Create API key in new project"</b></li>
+                                            <li>Sao chép mã và dán vào ô bên trên.</li>
+                                        </ol>
+                                        <p className="italic text-[10px] text-slate-500 mt-2 border-t border-blue-100 dark:border-blue-800/50 pt-2">
+                                            * API Key giúp AI luận giải sâu hơn và không bị giới hạn lượt dùng.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-10 flex gap-4">
+                                    <button
+                                        onClick={() => setShowSettings(false)}
+                                        className="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-all"
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        onClick={() => saveApiKey(apiKey)}
+                                        className="flex-1 py-4 bg-primary text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                    >
+                                        Lưu lại
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>
